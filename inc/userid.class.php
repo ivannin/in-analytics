@@ -153,4 +153,52 @@ class InaUserID extends InaModule
 		// InaManager::handleUserID
 		return '';
 	}
+	
+	// ------------------------------ RUNTIME ------------------------------
+	
+	/**
+	 * Подстановка UserID в runtime
+	 */   
+	public static function handleUserID($js)
+	{
+		// Информация о пользователе
+		global $user_ID, $user_login;
+		get_currentuserinfo();
+		
+		// Работаем только если включе GA, режим UserID или пользователь зашел не анонимно
+		if (get_option(InaAnalytics::OPTION_ENABLED) && get_option(InaUserID::OPTION_ENABLED) && $user_ID)
+		{
+			// Формируем заново строку параметров в ga('create')
+			$createParams = str_replace("%DOMAIN%", get_option(InaAnalytics::OPTION_COOKIE), "{'cookieDomain':'%DOMAIN%'}");
+			// Расширяем параметры
+			$createParamsWithUserID = str_replace("'}", "','userId':'{$user_ID}'}", $createParams);
+			// Заменяем строку
+			$js = str_replace($createParams, $createParamsWithUserID, $js);
+			
+			// Если включена передача произвольного параметра, добавляем данные перед pageview
+			if (get_option(InaUserID::OPTION_DIMENSION_ENABLED) && get_option(InaUserID::OPTION_CUSTOM_DIMENSION))
+			{
+				// Строка pageview
+				$pageview = "ga('send', 'pageview', gaOpt);";
+				// Строка установки dimension
+				$dimensionString = str_replace(
+					array(
+						'%DIMESION%',
+						'%USER_ID%'
+					),
+					array(
+						get_option(InaUserID::OPTION_CUSTOM_DIMENSION),
+						$user_login
+					),
+				"ga('set', '%DIMESION%', '%USER_ID%');");
+				// Подставляем строку
+				$js = str_replace($pageview, $dimensionString . PHP_EOL . $pageview, $js);
+			}
+		}
+		return $js;
+	}		
+	
+	
+	
+	
 }

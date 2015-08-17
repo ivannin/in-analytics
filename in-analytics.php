@@ -13,11 +13,14 @@ define('INA_TEXT_DOMAIN', 	'inanalytics');
 define('INA_FOLDER', 		plugin_dir_path(__FILE__));
 
 // Классы
-require(INA_FOLDER . 'inc/module.class.php');
+require(INA_FOLDER . 'inc/_module.class.php');
+require(INA_FOLDER . 'inc/_measurementprotocol.class.php');
 require(INA_FOLDER . 'inc/analytics.class.php');
 require(INA_FOLDER . 'inc/metrika.class.php');
 require(INA_FOLDER . 'inc/bouncerate.class.php');
 require(INA_FOLDER . 'inc/userid.class.php');
+require(INA_FOLDER . 'inc/openstat.class.php');
+require(INA_FOLDER . 'inc/forms.class.php');
 require(INA_FOLDER . 'inc/pagetracking.class.php');
 require(INA_FOLDER . 'inc/manager.class.php');
 

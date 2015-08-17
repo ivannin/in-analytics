@@ -69,6 +69,8 @@ class InaManager
 			'metrika' 		=> new InaMetrika(),
 			'bounce-rate'	=> new InaBounceRate(),
 			'ga_user_id'	=> new InaUserID(),
+			'ga_openstat'	=> new InaOpenstat(),
+			'ga_forms'		=> new InaForms(),
 			'ga_pageview' 	=> new InaPageTracking(),
 		);
 		$this->headerJS = '';
@@ -92,7 +94,7 @@ class InaManager
 			InaManager::MENU_SLUG,						// menu_slug - The slug name to refer to this menu by (should be unique for this menu).
 			'InaManager::adminMenuOptionPage',			// function - The function that displays the page content for the menu page. if the function is a member of a class within the plugin it should be referenced as array( $this, 'function_name' )
 			'dashicons-chart-line',						// icon
-			80											// position - The position in the menu order this menu should appear. 
+			85											// position - The position in the menu order this menu should appear. 
 		);
 		// Формируем подстраницы
 		foreach($manager->modules as $module)
@@ -158,7 +160,19 @@ class InaManager
 	}
 	
 	
-	// ------------------------------ RUNTIME ------------------------------	
+	// ------------------------------ RUNTIME ------------------------------
+	
+	/**#@+
+	* Названия фильтров и действий
+	* @const
+	*/
+	const HOOK_FILTER_HEADER_JS		= 'ina_header_js';
+	const HOOK_FILTER_FOOTER_JS		= 'ina_footer_js';
+	const HOOK_ACTION_HEADER_BEFORE	= 'ina_header_before';
+	const HOOK_ACTION_HEADER_AFTER	= 'ina_header_after';
+	const HOOK_ACTION_FOOTER_BEFORE	= 'ina_footer_before';
+	const HOOK_ACTION_FOOTER_AFTER	= 'ina_footer_after';
+	
 	/**
 	 * Формирует вывод в HEAD
 	 */   
@@ -166,10 +180,14 @@ class InaManager
 	{
 		if (WP_DEBUG) echo '<!-- IN-Analytics -->', PHP_EOL;
 		$js = get_option(self::OPTION_HEADER_JS);
-		$js = self::handleUserID($js);
+		$js = InaUserID::handleUserID($js);
+		$js = apply_filters(self::HOOK_FILTER_HEADER_JS, $js);
 		if (!empty($js))
 			$js = '<script id="in-analytics-head">' . PHP_EOL . $js . PHP_EOL . '</script>' . PHP_EOL;
+		// Вывод 
+		do_action(self::HOOK_ACTION_HEADER_BEFORE);
 		echo $js;
+		do_action(self::HOOK_ACTION_HEADER_AFTER);
 		if (WP_DEBUG) echo '<!--/IN-Analytics -->', PHP_EOL;
 	}
 	
@@ -180,54 +198,14 @@ class InaManager
 	{
 		if (WP_DEBUG) echo '<!-- IN-Analytics -->', PHP_EOL;
 		$js = get_option(self::OPTION_FOOTER_JS);
+		$js = apply_filters(self::HOOK_FILTER_FOOTER_JS, $js);
 		if (!empty($js))
 			$js = '<script id="in-analytics-footer">' . PHP_EOL . $js . PHP_EOL . '</script>' . PHP_EOL;
-		echo $js;		
+		// Вывод 
+		do_action(self::HOOK_ACTION_FOOTER_BEFORE);
+		echo $js;
+		do_action(self::HOOK_ACTION_FOOTER_AFTER);		
 		if (WP_DEBUG) echo '<!--/IN-Analytics -->', PHP_EOL;		
 	}
-	
-	/**
-	 * Подстановка UserID в runtime
-	 */   
-	public static function handleUserID($js)
-	{
-		// Информация о пользователе
-		global $user_ID, $user_login;
-		get_currentuserinfo();
-		
-		// Работаем только если включе GA, режим UserID или пользователь зашел не анонимно
-		if (get_option(InaAnalytics::OPTION_ENABLED) && get_option(InaUserID::OPTION_ENABLED) && $user_ID)
-		{
-			// Формируем заново строку параметров в ga('create')
-			$createParams = str_replace("%DOMAIN%", get_option(InaAnalytics::OPTION_COOKIE), "{'cookieDomain':'%DOMAIN%'}");
-			// Расширяем параметры
-			$createParamsWithUserID = str_replace("'}", "','userId':'{$user_ID}'}", $createParams);
-			// Заменяем строку
-			$js = str_replace($createParams, $createParamsWithUserID, $js);
-			
-			// Если включена передача произвольного параметра, добавляем данные перед pageview
-			if (get_option(InaUserID::OPTION_DIMENSION_ENABLED) && get_option(InaUserID::OPTION_CUSTOM_DIMENSION))
-			{
-				// Строка pageview
-				$pageview = "ga('send', 'pageview', gaOpt);";
-				// Строка установки dimension
-				$dimensionString = str_replace(
-					array(
-						'%DIMESION%',
-						'%USER_ID%'
-					),
-					array(
-						get_option(InaUserID::OPTION_CUSTOM_DIMENSION),
-						$user_login
-					),
-				"ga('set', '%DIMESION%', '%USER_ID%');");
-				// Подставляем строку
-				$js = str_replace($pageview, $dimensionString . PHP_EOL . $pageview, $js);
-			}
-		}
-		return $js;
-	}	
-	
-	
-	
+
 }
