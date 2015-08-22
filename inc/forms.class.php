@@ -194,8 +194,6 @@ class InaForms extends InaMeasurementProtocol
 	 */   
 	public static function sendCF7Post($cf7Object)
 	{
-		if (!get_option(self::OPTION_CF7_ENABLED)) return;
-		
 		/* DEBUG 
 		file_put_contents(INA_FOLDER.'/cf7Object.txt', var_export($cf7Object, true));*/
 		
@@ -206,6 +204,7 @@ class InaForms extends InaMeasurementProtocol
 			'action'	=> get_option(self::OPTION_ACTION),
 			'label'		=> $label,
 		));
+		return $cf7Object;
 	}
 
 	/**
@@ -213,8 +212,6 @@ class InaForms extends InaMeasurementProtocol
 	 */   
 	public static function sendGravityPost($entry, $form)
 	{
-		if (!get_option(self::OPTION_CRAVITY_ENABLED)) return;
-
 		$label = $form->title;
 
 		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
@@ -222,6 +219,7 @@ class InaForms extends InaMeasurementProtocol
 			'action'	=> get_option(self::OPTION_ACTION),
 			'label'		=> $label,
 		));
+		return true;
 	}
 
 	
