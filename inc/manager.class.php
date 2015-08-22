@@ -1,7 +1,8 @@
 <?php
 // Установка обработчиков
-add_action('wp_head', 'InaManager::wpHead');
-add_action('wp_footer', 'InaManager::wpFooter');
+add_action('wp_head', 				'InaManager::wpHead');
+add_action('wp_footer', 			'InaManager::wpFooter');
+add_action('wp_enqueue_scripts',	'InaManager::enqueueScripts');
 
 /**
  * Менеджер - Класс реализующий основной функционал плагина
@@ -50,13 +51,13 @@ class InaManager
 	 * JS Код для шапки
 	 * @var string
 	 */
-	protected static $headerJS;
+	protected $headerJS;
 	
 	/**
 	 * JS Код для подвала
 	 * @var string
 	 */
-	protected static $footerJS;		
+	protected $footerJS;
 	
 
 	/**
@@ -70,8 +71,9 @@ class InaManager
 			'bounce-rate'	=> new InaBounceRate(),
 			'ga_user_id'	=> new InaUserID(),
 			'ga_openstat'	=> new InaOpenstat(),
+			'ga_pageview' 	=> new InaReadMarkers(),			
 			'ga_forms'		=> new InaForms(),
-			'ga_pageview' 	=> new InaPageTracking(),
+			'ga_reading' 	=> new InaPageTracking(),
 		);
 		$this->headerJS = '';
 		$this->footerJS = '';
@@ -101,8 +103,9 @@ class InaManager
 			$module->adminMenu();
 		
 		// Формируем опции для runtime режима
-		update_option(self::OPTION_HEADER_JS, $manager->getHeaderJS());
-		update_option(self::OPTION_FOOTER_JS, $manager->getFooterJS());
+		update_option(self::OPTION_HEADER_JS, 		$manager->getHeaderJS());
+		update_option(self::OPTION_FOOTER_JS, 		$manager->getFooterJS());
+		update_option(self::OPTION_ENQUEUE_SCRIPTS, InaModule::$jsScripts);
 	}	
 	
 	/**
@@ -119,7 +122,8 @@ class InaManager
 			echo '<pre>', htmlspecialchars(get_option(self::OPTION_HEADER_JS)), '</pre>' . PHP_EOL;
 			echo '<h3>', __('Footer JavaScript', 'inanalytics'), '</h3>' . PHP_EOL;
 			echo '<pre>', htmlspecialchars(get_option(self::OPTION_FOOTER_JS)), '</pre>' . PHP_EOL;
-		
+			echo '<h3>', __('Enqueue JavaScript', 'inanalytics'), '</h3>' . PHP_EOL;
+			echo '<pre>', htmlspecialchars(var_export(get_option(self::OPTION_ENQUEUE_SCRIPTS)), true), '</pre>' . PHP_EOL;
 		}
 	}	
 	
@@ -143,7 +147,7 @@ class InaManager
 	}
 	
 	/**
-	 * Метод собирает код для шапки и подвала
+	 * Метод собирает код для шапки и подвала, а также внешние скрипты
 	 */   
 	protected function readModules()
 	{
@@ -154,7 +158,8 @@ class InaManager
 			if ($module->isEnabled())
 			{
 				$this->headerJS .= $module->getHeaderJS();
-				$this->footerJS .= $module->getFooterJS();				
+				$this->footerJS .= $module->getFooterJS();
+				$module->registerScripts();
 			}
 		}
 	}
@@ -208,4 +213,15 @@ class InaManager
 		if (WP_DEBUG) echo '<!--/IN-Analytics -->', PHP_EOL;		
 	}
 
+	
+	/**
+	 * Регистрируем скрипты
+	 */   
+	public static function enqueueScripts()
+	{
+		$jsScripts = get_option(self::OPTION_ENQUEUE_SCRIPTS);
+		InaModule::enqueueScripts($jsScripts);
+	}	
+	
+	
 }

@@ -84,5 +84,59 @@ abstract class InaModule
 	public function getFooterJS($templateFile='')
 	{
 		return '';
+	}
+	
+	/**
+	 * Массив дополнительных скриптов
+	 * @var SingletonTest
+	 */
+	public static $jsScripts;
+	
+	/**
+	 * Метод добавляет в массив дополнительный скрипт
+	 *
+	 * @param string	$id 			ID скрипта
+	 * @param string	$url 			URL скрипта
+	 * @param string	$version 		Версия скрипта
+	 * @param mixed		$dep 			Зависимости скрипта
+	 * @param bool		$inFooter 		Скрипт располагать в футере
+     * @return void	 
+	 */   
+	public function addJSFile($id, $url, $version='1.0.0', $dep=array(), $inFooter=true)
+	{
+		self::$jsScripts[$id] = array
+		(
+			'url' 		=> $url,
+			'version' 	=> $version,
+			'dep' 		=> $dep,
+			'inFooter' 	=> $inFooter,
+		);
+	}
+	
+	
+	/**
+	 * Метод регистрирует скрипты для модуля
+	 *
+	 */   
+	public function registerScripts()
+	{
+		return;
 	}	
+	
+	
+	/**
+	 * Метод в runtime регистриует скрипты
+ 	 *
+	 * @param mixed	$$jsScripts 			массив $jsScripts, тот же, что и выше
+     * @return void	 
+	 */   
+	public static function enqueueScripts($jsScripts)
+	{
+		foreach($jsScripts as $id => $jsScript)
+		{
+			wp_register_script($id, $jsScript['url'], $jsScript['dep'], $jsScript['version'], $jsScript['inFooter']);
+			wp_enqueue_script($id);
+		}
+	}	
+	
 }

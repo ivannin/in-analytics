@@ -191,10 +191,33 @@ class InaForms extends InaMeasurementProtocol
 	{
 		if (!get_option(self::OPTION_CF7_ENABLED)) return;
 		
+		/* DEBUG 
+		file_put_contents(INA_FOLDER.'/cf7Object.txt', var_export($cf7Object, true));*/
+		
+		$label = $cf7Object->_wpcf7;
+		
 		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
 			'category'	=> get_option(self::OPTION_CATEGORY),
 			'action'	=> get_option(self::OPTION_ACTION),
-			'label'		=> $cf7Object->title,
+			'label'		=> $label,
 		));
-	}		
+	}
+
+	/**
+	 * Отправка события формы Gravity Forms
+	 */   
+	public static function sendGravityPost($entry, $form)
+	{
+		if (!get_option(self::OPTION_CRAVITY_ENABLED)) return;
+
+		$label = $form->title;
+
+		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+			'category'	=> get_option(self::OPTION_CATEGORY),
+			'action'	=> get_option(self::OPTION_ACTION),
+			'label'		=> $label,
+		));
+	}
+
+	
 }

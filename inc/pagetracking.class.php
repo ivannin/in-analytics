@@ -31,5 +31,4 @@ class InaPageTracking extends InaModule
 	{
 		return "ga('send', 'pageview', gaOpt);";
 	}
-
 }

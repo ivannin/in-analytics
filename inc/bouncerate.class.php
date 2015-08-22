@@ -167,24 +167,33 @@ class InaBounceRate extends InaModule
 	 */   
 	public function getHeaderJS($templateFile='')
 	{
+		return '';
+	}
+	
+	/**
+	 * Метод возвращает JS код модуля для Footer
+	 */   
+	public function getFooterJS($templateFile='')
+	{
 		$js = '';
 		if (get_option(InaAnalytics::OPTION_ENABLED))
 		{
 			$gaJS .= parent::getHeaderJS(INA_FOLDER . 'js/accurate-bounce-rate.js') . PHP_EOL;
 			$gaJS = str_replace(
-				array(
-					'%CATEGORY%',
-					'%ACTION%',
-					'%TIMEOUT%'
-				), 
-				array(
-					get_option(self::OPTION_CATEGORY),
-					get_option(self::OPTION_ACTION),
-					get_option(self::OPTION_TIMEOUT)
-				), 
-				$gaJS);
+			array(
+			'%CATEGORY%',
+			'%ACTION%',
+			'%TIMEOUT%'
+			), 
+			array(
+			get_option(self::OPTION_CATEGORY),
+			get_option(self::OPTION_ACTION),
+			get_option(self::OPTION_TIMEOUT)
+			), 
+			$gaJS);
 			$js .= $gaJS;
 		}
 		return $js;
-	}
+	}	
+	
 }

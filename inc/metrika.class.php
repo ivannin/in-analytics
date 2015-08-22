@@ -2,7 +2,7 @@
 /**
  * Модуль Яндекс.Метрика
  *
- * Реализует учет точного показателя отказов
+ * Реализует подключение Яндекс.Метрики 
  */
 class InaMetrika extends InaModule
 {
@@ -61,10 +61,10 @@ class InaMetrika extends InaModule
 	{
 		// Создает секцию параметров
 		add_settings_section(
-			self::SECTION,										// id - String for use in the 'id' attribute of tags
-			__('Accurate Bounce Rate Options', 'inanalytics'), 	// title -  Title of the section
+			self::SECTION,									// id - String for use in the 'id' attribute of tags
+			__('Yandex Metrika Options', 'inanalytics'), 	// title -  Title of the section
 			'InaMetrika::showSectionDescription',			// callback - Function that fills the section with the desired content
-			self::MENU_SLUG										// page - The menu page on which to display this section. Should match $menu_slug
+			self::MENU_SLUG									// page - The menu page on which to display this section. Should match $menu_slug
 		);
 		// Параметр: включение модуля
 		register_setting(self::MENU_SLUG, self::OPTION_ENABLED);
