@@ -1,5 +1,10 @@
 <?php
-add_action('wpcf7_posted_data', 'InaForms::sendCF7Post');
+/* Hooks */
+if (get_option(InaForms::OPTION_CF7_ENABLED))
+	add_action('wpcf7_posted_data', 'InaForms::sendCF7Post');
+if (get_option(InaForms::OPTION_CRAVITY_ENABLED))
+	add_action('gform_after_submission', 'InaForms::sendGravityPost');
+
 
 /**
  * Модуль Интеграция с формами

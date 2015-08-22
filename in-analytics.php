@@ -24,6 +24,7 @@ require(INA_FOLDER . 'inc/openstat.class.php');
 require(INA_FOLDER . 'inc/forms.class.php');
 require(INA_FOLDER . 'inc/pagetracking.class.php');
 require(INA_FOLDER . 'inc/readmarkers.class.php');
+require(INA_FOLDER . 'inc/downloads.class.php');
 require(INA_FOLDER . 'inc/manager.class.php');
 
 

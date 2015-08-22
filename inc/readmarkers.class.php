@@ -1,8 +1,8 @@
 <?php
 /**
- * Модуль Яндекс.Метрика
+ * Модуль маркеров чтения
  *
- * Реализует подключение Яндекс.Метрики 
+ * Реализует отслеживания чтения статьи
  */
 class InaReadMarkers extends InaModule
 {
@@ -134,7 +134,7 @@ class InaReadMarkers extends InaModule
 		$value = get_option($name);
 		$checked = checked($value, 1, false);
 		echo "<input type='checkbox' name='{$name}' {$checked} value='1'>&nbsp;&nbsp;";
-		_e('Check this for enabling Yandex Metrika. Read more here', 'inanalytics');
+		_e('Check this for enabling article reading tracking. Read more here', 'inanalytics');
 	}
 
 	/**

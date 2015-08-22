@@ -58,7 +58,7 @@ class InaOpenstat extends InaModule
 		// Создает секцию параметров
 		add_settings_section(
 			self::SECTION,										// id - String for use in the 'id' attribute of tags
-			__('Openstat Tracking Options', 'inanalytics'), 		// title -  Title of the section
+			__('Openstat Tracking Options', 'inanalytics'), 	// title -  Title of the section
 			'InaOpenstat::showSectionDescription',				// callback - Function that fills the section with the desired content
 			self::MENU_SLUG										// page - The menu page on which to display this section. Should match $menu_slug
 		);
@@ -66,8 +66,8 @@ class InaOpenstat extends InaModule
 		register_setting(self::MENU_SLUG, self::OPTION_ENABLED);
 		add_settings_field( 
 			self::OPTION_ENABLED,								// id - String for use in the 'id' attribute of tags
-			__('Openstat tracking enabled', 'inanalytics' ),		// Title of the field
-			'InaOpenstat::showModuleEnabled',						// callback - Function that fills the field with the desired inputs
+			__('Openstat tag tracking enabled', 'inanalytics' ),// Title of the field
+			'InaOpenstat::showModuleEnabled',					// callback - Function that fills the field with the desired inputs
 			self::MENU_SLUG, 									// page - The menu page on which to display this field
 			self::SECTION 										// section - The section of the settings page
 		);
