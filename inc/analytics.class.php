@@ -236,7 +236,8 @@ class InaAnalytics extends InaModule
 	public function getHeaderJS($templateFile='')
 	{
 		$js = '';
-		if (empty(get_option(self::OPTION_ID)))
+		$googleId = get_option(self::OPTION_ID);
+		if (empty($googleId))
 			$js .= '/*! GOOGLE ANALYTICS ID NOT SPECIFIED !*/';
 		$js .= parent::getHeaderJS(INA_FOLDER . 'js/google-analytics.js') . PHP_EOL;
 		// Cross domain creation param
@@ -248,7 +249,7 @@ class InaAnalytics extends InaModule
 				'%DOMAIN%'
 			), 
 			array(
-				get_option(self::OPTION_ID),
+				$googleId,
 				get_option(self::OPTION_COOKIE)
 			), 
 			$js);
