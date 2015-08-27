@@ -2,6 +2,7 @@
 /* Hooks */
 if (get_option(InaForms::OPTION_CF7_ENABLED))
 	add_action('wpcf7_posted_data', 'InaForms::sendCF7Post');
+
 if (get_option(InaForms::OPTION_CRAVITY_ENABLED))
 	add_action('gform_after_submission', 'InaForms::sendGravityPost');
 
@@ -23,6 +24,8 @@ class InaForms extends InaMeasurementProtocol
 	const OPTION_CRAVITY_ENABLED	= 'ina_forms_gravity_enabled';
 	const OPTION_CATEGORY			= 'ina_forms_category';
 	const OPTION_ACTION				= 'ina_forms_action';
+	const OPTION_CATEGORY_DEFAULT	= 'Forms';
+	const OPTION_ACTION_DEFAULT		= 'Send';
 
 
 	/**
@@ -197,11 +200,11 @@ class InaForms extends InaMeasurementProtocol
 		/* DEBUG 
 		file_put_contents(INA_FOLDER.'/cf7Object.txt', var_export($cf7Object, true));*/
 		
-		$label = $cf7Object->_wpcf7;
+		$label = (is_object($cf7Object)) ? $cf7Object->_wpcf7 : '';
 		
 		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
-			'category'	=> get_option(self::OPTION_CATEGORY),
-			'action'	=> get_option(self::OPTION_ACTION),
+			'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
+			'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
 			'label'		=> $label,
 		));
 		return $cf7Object;
@@ -212,11 +215,11 @@ class InaForms extends InaMeasurementProtocol
 	 */   
 	public static function sendGravityPost($entry, $form)
 	{
-		$label = $form->title;
+		$label = (is_object($form)) ? $form->title : '';
 
 		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
-			'category'	=> get_option(self::OPTION_CATEGORY),
-			'action'	=> get_option(self::OPTION_ACTION),
+			'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
+			'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
 			'label'		=> $label,
 		));
 		return true;
