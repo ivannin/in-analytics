@@ -200,12 +200,10 @@ class InaForms extends InaMeasurementProtocol
 		/* DEBUG 
 		file_put_contents(INA_FOLDER.'/cf7Object.txt', var_export($cf7Object, true));*/
 		
-		$label = (is_object($cf7Object)) ? $cf7Object->_wpcf7 : '';
-		
-		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+		InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
 			'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
 			'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
-			'label'		=> $label,
+			'label'		=> (is_object($cf7Object)) ? $cf7Object->_wpcf7 : ''
 		));
 		return $cf7Object;
 	}
@@ -217,7 +215,7 @@ class InaForms extends InaMeasurementProtocol
 	{
 		$label = (is_object($form)) ? $form->title : '';
 
-		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+		InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
 			'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
 			'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
 			'label'		=> $label,
