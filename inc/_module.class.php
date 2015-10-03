@@ -127,11 +127,12 @@ abstract class InaModule
 	/**
 	 * Метод в runtime регистриует скрипты
  	 *
-	 * @param mixed	$$jsScripts 			массив $jsScripts, тот же, что и выше
+	 * @param mixed	$jsScripts 			массив $jsScripts, тот же, что и выше
      * @return void	 
 	 */   
 	public static function enqueueScripts($jsScripts)
 	{
+		if (empty($jsScripts)) return;
 		foreach($jsScripts as $id => $jsScript)
 		{
 			wp_register_script($id, $jsScript['url'], $jsScript['dep'], $jsScript['version'], $jsScript['inFooter']);

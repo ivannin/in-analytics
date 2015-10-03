@@ -76,6 +76,7 @@ class InaManager
 			'ga_forms'		=> new InaForms(),
 			'ga_reading' 	=> new InaPageTracking(),
 			'ga_downloads' 	=> new InaDownloads(),
+			'custom_code' 	=> new InaCustomCode(),
 		);
 		$this->headerJS = '';
 		$this->footerJS = '';
@@ -190,6 +191,7 @@ class InaManager
 			self::MENU_SLUG, 								// page - The menu page on which to display this field
 			self::SECTION 									// section - The section of the settings page
 		);
+		
 		// Параметр: включение отслеживания исходящих ссылок
 		register_setting(self::MENU_SLUG, InaDownloads::OPTION_OUTBOUND_LINKS_ENABLED);
 		add_settings_field( 
@@ -199,6 +201,17 @@ class InaManager
 			self::MENU_SLUG, 								// page - The menu page on which to display this field
 			self::SECTION 									// section - The section of the settings page
 		);	
+
+		// Параметр: произвольный код
+		register_setting(self::MENU_SLUG, InaCustomCode::OPTION_ENABLED);
+		add_settings_field( 
+			InaCustomCode::OPTION_ENABLED,				// id - String for use in the 'id' attribute of tags
+			__('Custom Code enabled', 'inanalytics'),	// Title of the field
+			'InaCustomCode::showModuleEnabled',			// callback - Function that fills the field with the desired inputs
+			self::MENU_SLUG, 							// page - The menu page on which to display this field
+			self::SECTION 								// section - The section of the settings page
+		);	
+		
 
 		
 		// Формируем подстраницы
@@ -303,14 +316,22 @@ class InaManager
 	public static function wpHead()
 	{
 		if (WP_DEBUG) echo '<!-- IN-Analytics -->', PHP_EOL;
-		$js = get_option(self::OPTION_HEADER_JS);
-		$js = InaUserID::handleUserID($js);
-		$js = apply_filters(self::HOOK_FILTER_HEADER_JS, $js);
-		if (!empty($js))
-			$js = '<script id="in-analytics-head">' . PHP_EOL . $js . PHP_EOL . '</script>' . PHP_EOL;
+		$headerCode = get_option(self::OPTION_HEADER_JS);
+		$headerCode = InaUserID::handleUserID($headerCode);
+		$headerCode = apply_filters(self::HOOK_FILTER_HEADER_JS, $headerCode);
+		// Сформированный JS
+		if (!empty($headerCode))
+		{
+			$headerCode = '<script id="in-analytics-head">' . PHP_EOL . $headerCode . PHP_EOL . '</script>' . PHP_EOL;
+		}
+		// Дополнительный код
+		if (get_option(InaCustomCode::OPTION_ENABLED))
+		{
+			$headerCode .= get_option(InaCustomCode::OPTION_HEADER) . PHP_EOL;				
+		}
 		// Вывод 
 		do_action(self::HOOK_ACTION_HEADER_BEFORE);
-		echo $js;
+		echo $headerCode;
 		do_action(self::HOOK_ACTION_HEADER_AFTER);
 		if (WP_DEBUG) echo '<!--/IN-Analytics -->', PHP_EOL;
 	}
@@ -321,13 +342,21 @@ class InaManager
 	public static function wpFooter()
 	{
 		if (WP_DEBUG) echo '<!-- IN-Analytics -->', PHP_EOL;
-		$js = get_option(self::OPTION_FOOTER_JS);
-		$js = apply_filters(self::HOOK_FILTER_FOOTER_JS, $js);
-		if (!empty($js))
-			$js = '<script id="in-analytics-footer">' . PHP_EOL . $js . PHP_EOL . '</script>' . PHP_EOL;
+		$footerCode = get_option(self::OPTION_FOOTER_JS);
+		$footerCode = apply_filters(self::HOOK_FILTER_FOOTER_JS, $footerCode);
+		// Сформированный JS
+		if (!empty($footerCode))
+		{
+			$footerCode = '<script id="in-analytics-footer">' . PHP_EOL . $footerCode . PHP_EOL . '</script>' . PHP_EOL;
+		}
+		// Дополнительный код
+		if (get_option(InaCustomCode::OPTION_ENABLED))
+		{
+			$footerCode .= get_option(InaCustomCode::OPTION_FOOTER) . PHP_EOL;				
+		}		
 		// Вывод 
 		do_action(self::HOOK_ACTION_FOOTER_BEFORE);
-		echo $js;
+		echo $footerCode;
 		do_action(self::HOOK_ACTION_FOOTER_AFTER);		
 		if (WP_DEBUG) echo '<!--/IN-Analytics -->', PHP_EOL;		
 	}

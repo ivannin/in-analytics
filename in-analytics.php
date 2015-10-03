@@ -3,7 +3,7 @@
 Plugin Name: IN-Analytics
 Plugin URI: http://in-analytics.com/
 Description: Just another Google Analytics Plugin
-Version: 0.11
+Version: 0.12
 Author: Ivan Nikitin
 Author URI: http://ivannikitin.com
 Text Domain: inanalytics
@@ -25,6 +25,7 @@ require(INA_FOLDER . 'inc/forms.class.php');
 require(INA_FOLDER . 'inc/pagetracking.class.php');
 require(INA_FOLDER . 'inc/readmarkers.class.php');
 require(INA_FOLDER . 'inc/downloads.class.php');
+require(INA_FOLDER . 'inc/customcode.class.php');
 require(INA_FOLDER . 'inc/manager.class.php');
 
 
