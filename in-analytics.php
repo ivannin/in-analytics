@@ -3,7 +3,7 @@
 Plugin Name: IN-Analytics
 Plugin URI: http://in-analytics.com/
 Description: Just another Google Analytics Plugin
-Version: 0.12
+Version: 0.13
 Author: Ivan Nikitin
 Author URI: http://ivannikitin.com
 Text Domain: inanalytics

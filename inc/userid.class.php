@@ -10,11 +10,13 @@ class InaUserID extends InaModule
 	* Параметры опций модуля
 	* @const
 	*/
-	const MENU_SLUG					= 'in-analytics-user-id.php';
-	const SECTION					= 'ina_user_id';
-	const OPTION_ENABLED			= 'ina_uid_enabled';
-	const OPTION_DIMENSION_ENABLED	= 'ina_uid_custom_dim_enabled';
-	const OPTION_CUSTOM_DIMENSION	= 'ina_uid_custom_dim';
+	const MENU_SLUG						= 'in-analytics-user-id.php';
+	const SECTION						= 'ina_user_id';
+	const OPTION_ENABLED				= 'ina_uid_enabled';
+	const OPTION_DIMENSION_ENABLED		= 'ina_uid_custom_dim_enabled';
+	const OPTION_CUSTOM_DIMENSION		= 'ina_uid_custom_dim';
+	const OPTION_ROLE_ENABLED			= 'ina_uid_custom_dim_role_enabled';	
+	const OPTION_ROLE_DIMENSION			= 'ina_uid_custom_dim_role';
 
 	/**
 	 * Конструктор класса
@@ -90,7 +92,25 @@ class InaUserID extends InaModule
 			'InaUserID::showCustomDimension',			// callback - Function that fills the field with the desired inputs
 			self::MENU_SLUG, 							// page - The menu page on which to display this field
 			self::SECTION 								// section - The section of the settings page
-		);		
+		);
+		// Параметр: Отправка User Role в произвольный параметр
+		register_setting(self::MENU_SLUG, self::OPTION_ROLE_ENABLED);
+		add_settings_field( 
+			self::OPTION_ROLE_ENABLED,					// id - String for use in the 'id' attribute of tags
+			__('Also send User Role to custom dimension', 'inanalytics'),		// Title of the field
+			'InaUserID::showRoleDimensionEnabled',	// callback - Function that fills the field with the desired inputs
+			self::MENU_SLUG, 							// page - The menu page on which to display this field
+			self::SECTION 								// section - The section of the settings page
+		);
+		// Параметр: Имя произвольного параметра для роли
+		register_setting(self::MENU_SLUG, self::OPTION_ROLE_DIMENSION);
+		add_settings_field( 
+			self::OPTION_ROLE_DIMENSION,				// id - String for use in the 'id' attribute of tags
+			__('Custom Dimension Name', 'inanalytics'),	// Title of the field
+			'InaUserID::showRoleDimension',				// callback - Function that fills the field with the desired inputs
+			self::MENU_SLUG, 							// page - The menu page on which to display this field
+			self::SECTION 								// section - The section of the settings page
+		);	
 	}
 
 	/**
@@ -124,16 +144,37 @@ class InaUserID extends InaModule
 		_e('Check this for enabling send User ID tracking. You also must create the custom dimension in Google Analytics Administration. Read more here', 'inanalytics');
 	}
 	/**
-	 * Показывает поле Bounce Rate Timeout
+	 * Показывает поле параметра User ID
 	 */   
 	 public static function showCustomDimension()
 	{
 		$name = self::OPTION_CUSTOM_DIMENSION;
 		$value = get_option($name, 'dimension1');
 		echo "<input type='text' name='{$name}' value='{$value}'>&nbsp;&nbsp;";
-		_e('Specify the custom dimension name. Read more here', 'inanalytics');
+		_e('Specify the custom dimension name for User ID. Read more here', 'inanalytics');
 	}
-
+	/**
+	 * Показывает поле вклчюение произвольного параметра роли
+	 */   
+	public static function showRoleDimensionEnabled()
+	{
+		$name = self::OPTION_ROLE_ENABLED;
+		$value = get_option($name);
+		$checked = checked($value, 1, false);
+		echo "<input type='checkbox' name='{$name}' {$checked} value='1'>&nbsp;&nbsp;";
+		_e('Check this for enabling send User Role tracking. You also must create the custom dimension in Google Analytics Administration. Read more here', 'inanalytics');
+	}
+	/**
+	 * Показывает поле параметра роли
+	 */   
+	public static function showRoleDimension()
+	{
+		$name = self::OPTION_ROLE_DIMENSION;
+		$value = get_option($name, 'dimension2');
+		echo "<input type='text' name='{$name}' value='{$value}'>&nbsp;&nbsp;";
+		_e('Specify the custom dimension name for User Role. Read more here', 'inanalytics');
+	}
+	
 	
 	/**
 	 * Метод возвращает доступность модуля
@@ -162,9 +203,21 @@ class InaUserID extends InaModule
 	public static function handleUserID($js)
 	{
 		// Информация о пользователе
-		global $user_ID, $user_login;
-		get_currentuserinfo();
+		//global $user_ID, $user_login, $current_user;
+		//get_currentuserinfo();
 		
+		global $current_user;
+		$user_ID = $current_user->ID;
+		$user_login = $current_user->user_login;
+		$user_roles = $current_user->roles;
+		$user_role = array_shift($user_roles);
+		
+		/* DEBUG
+		echo '<pre>', PHP_EOL,PHP_EOL, 'ROLE: ', $user_role, PHP_EOL, 
+			'ID: ', $user_ID, PHP_EOL,
+			'current_user: ', var_dump($current_user), '</pre>';
+		*/
+	
 		// Работаем только если включе GA, режим UserID или пользователь зашел не анонимно
 		if (get_option(InaAnalytics::OPTION_ENABLED) && get_option(InaUserID::OPTION_ENABLED) && $user_ID)
 		{
@@ -175,11 +228,14 @@ class InaUserID extends InaModule
 			// Заменяем строку
 			$js = str_replace($createParams, $createParamsWithUserID, $js);
 			
-			// Если включена передача произвольного параметра, добавляем данные перед pageview
+			// Строка pageview
+			$pageview = "ga('send', 'pageview', gaOpt);";			
+			
+			// Если включена передача произвольного параметра USER ID, добавляем данные перед pageview
 			if (get_option(InaUserID::OPTION_DIMENSION_ENABLED) && get_option(InaUserID::OPTION_CUSTOM_DIMENSION))
 			{
-				// Строка pageview
-				$pageview = "ga('send', 'pageview', gaOpt);";
+				
+					
 				// Строка установки dimension
 				$dimensionString = str_replace(
 					array(
@@ -190,15 +246,31 @@ class InaUserID extends InaModule
 						get_option(InaUserID::OPTION_CUSTOM_DIMENSION),
 						$user_login
 					),
-				"ga('set', '%DIMESION%', '%USER_ID%');");
+					"ga('set', '%DIMESION%', '%USER_ID%');");
 				// Подставляем строку
 				$js = str_replace($pageview, $dimensionString . PHP_EOL . $pageview, $js);
-			}
+			}				
+			
+			// Если включена передача произвольного параметра РОЛИ, добавляем данные перед pageview
+			if (get_option(InaUserID::OPTION_ROLE_ENABLED) && get_option(InaUserID::OPTION_ROLE_DIMENSION))
+			{
+				
+				// Строка установки dimension
+				$dimensionString = str_replace(
+					array(
+						'%DIMESION%',
+						'%USER_ROLE%'
+					),
+					array(
+						get_option(InaUserID::OPTION_ROLE_DIMENSION),
+						$user_role
+					),
+				"ga('set', '%DIMESION%', '%USER_ROLE%');");
+				// Подставляем строку
+				$js = str_replace($pageview, $dimensionString . PHP_EOL . $pageview, $js);
+			}			
+			
 		}
 		return $js;
 	}		
-	
-	
-	
-	
 }
