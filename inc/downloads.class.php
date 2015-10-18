@@ -124,7 +124,7 @@ class InaDownloads extends InaModule
 	 */   
 	 public static function showSectionDescription()
 	{
-		echo 'showSectionDescription';
+		_e('This module implements tracking files download and clicks on outbound links. Downloaded files are tracking as pages viewed, and clicks on outblong links to other sites are tracking as Google Analytics Events.', 'inanalytics');
 	}	
 	
 	/**

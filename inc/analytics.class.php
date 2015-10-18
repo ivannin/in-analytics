@@ -141,7 +141,7 @@ class InaAnalytics extends InaModule
 	 */   
 	 public static function showSectionDescription()
 	{
-		echo 'showSectionDescription';
+		_e('This module provides Google Analytics basic settins and cross-domain tracking configuration.', 'inanalytics');
 	}	
 	
 	/**

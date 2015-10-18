@@ -109,7 +109,7 @@ class InaBounceRate extends InaModule
 	 */   
 	 public static function showSectionDescription()
 	{
-		echo 'showSectionDescription';
+		_e('This module implements proper tracking of accutare bounce rate in Google Analytics considering the minimum time on the first session page.', 'inanalytics');
 	}	
 	
 	/**

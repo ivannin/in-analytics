@@ -119,13 +119,7 @@ class InaForms extends InaMeasurementProtocol
 	 */   
 	 public static function showSectionDescription()
 	{
-		/* DEBUG: Отправка тестового события 
-		static::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
-			'category'	=> 'Тест',
-			'action'	=> 'Тестовое действие',
-			'label'		=> 'Тестовое событие',
-		)); */
-		echo 'showSectionDescription';
+		_e('This module implements integration with forms plugins. The Form sending is tracking as Google Analytics Event.', 'inanalytics');
 	}	
 	
 	/**

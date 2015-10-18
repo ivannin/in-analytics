@@ -100,7 +100,7 @@ class InaCustomCode extends InaModule
 	 */   
 	 public static function showSectionDescription()
 	{
-		echo 'showSectionDescription';
+		_e('This module allows you to add custom HTML or JavaScript code in the page header or footer.', 'inanalytics');
 	}	
 	
 	/**
