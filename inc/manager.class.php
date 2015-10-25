@@ -74,6 +74,7 @@ class InaManager
 			'ga_openstat'	=> new InaOpenstat(),
 			'ga_pageview' 	=> new InaReadMarkers(),			
 			'ga_forms'		=> new InaForms(),
+			'ga_wordpress'	=> new InaWordpress(),
 			'ga_reading' 	=> new InaPageTracking(),
 			'ga_downloads' 	=> new InaDownloads(),
 			'custom_code' 	=> new InaCustomCode(),
@@ -155,6 +156,15 @@ class InaManager
 			self::MENU_SLUG, 									// page - The menu page on which to display this field
 			self::SECTION 										// section - The section of the settings page
 		);
+		// Параметр: События WordPress
+		register_setting(self::MENU_SLUG, InaWordpress::OPTION_ENABLED);
+		add_settings_field( 
+			InaWordpress::OPTION_ENABLED,						// id - String for use in the 'id' attribute of tags
+			__('WordPress Events Tracking enabled', 'inanalytics' ),// Title of the field
+			'InaWordpress::showEnabled',						// callback - Function that fills the field with the desired inputs
+			self::MENU_SLUG, 									// page - The menu page on which to display this field
+			self::SECTION 										// section - The section of the settings page
+		);		
 		// Параметр: Маркеры чтения
 		register_setting(self::MENU_SLUG, InaReadMarkers::OPTION_ENABLED);
 		add_settings_field( 

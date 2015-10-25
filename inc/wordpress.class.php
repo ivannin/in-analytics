@@ -1,10 +1,11 @@
 <?php
 /* Hooks */
-if (get_option(InaWordpress::OPTION_WP_ENABLED))
+if (get_option(InaWordpress::OPTION_ENABLED))
 {
-	//add_action('wpcf7_posted_data', 'InaWordpress::sendCF7Post');	
-		
-		
+	add_action('user_register', 'InaWordpress::sendUserRegister', 10, 1);	
+	add_action('wp_login', 'InaWordpress::sendUserLogin', 10, 2);	
+	add_action('password_reset', 'InaWordpress::sendResetPassword', 10, 2);	
+	add_action('comment_post', 'InaWordpress::sendNewComment', 10, 2 );	
 }
 	
 
@@ -22,7 +23,7 @@ class InaWordpress extends InaMeasurementProtocol
 	*/
 	const MENU_SLUG								= 'in-analytics-wordpress.php';
 	const SECTION								= 'ina_wordpress';
-	const OPTION_WP_ENABLED						= 'ina_wp_event_enabled';
+	const OPTION_ENABLED						= 'ina_wp_event_enabled';
 	const OPTION_CATEGORY						= 'ina_wp_event_category';
 	const OPTION_CATEGORY_DEFAULT				= 'WordPress';
 	const OPTION_EVENT_USER_REGISTER			= 'ina_wp_event_user_register';
@@ -83,9 +84,9 @@ class InaWordpress extends InaMeasurementProtocol
 			self::MENU_SLUG							// page - The menu page on which to display this section. Should match $menu_slug
 		);
 		// Параметр: Интеграция с WordPress
-		register_setting(self::MENU_SLUG, self::OPTION_WP_ENABLED);
+		register_setting(self::MENU_SLUG, self::OPTION_ENABLED);
 		add_settings_field( 
-			self::OPTION_WP_ENABLED,			// id - String for use in the 'id' attribute of tags
+			self::OPTION_ENABLED,				// id - String for use in the 'id' attribute of tags
 			__('WordPress Events Tracking enabled', 'inanalytics' ),	// Title of the field
 			'InaWordpress::showEnabled',		// callback - Function that fills the field with the desired inputs
 			self::MENU_SLUG, 					// page - The menu page on which to display this field
@@ -152,7 +153,7 @@ class InaWordpress extends InaMeasurementProtocol
 	 */   
 	 public static function showEnabled()
 	{
-		$name = self::OPTION_WP_ENABLED;
+		$name = self::OPTION_ENABLED;
 		$value = get_option($name);
 		$checked = checked($value, 1, false);
 		echo "<input type='checkbox' name='{$name}' {$checked} value='1'>&nbsp;&nbsp;";
@@ -165,7 +166,7 @@ class InaWordpress extends InaMeasurementProtocol
 	 public static function showCategory()
 	{
 		$name = self::OPTION_CATEGORY;
-		$value = get_option($name, __('Events Category', 'inanalytics'), self::OPTION_CATEGORY_DEFAULT);
+		$value = get_option($name, __('WordPress', 'inanalytics'));
 		echo "<input type='text' name='{$name}' value='{$value}'>&nbsp;&nbsp;";
 		_e('Specify the event category.', 'inanalytics');
 	}	
@@ -175,7 +176,7 @@ class InaWordpress extends InaMeasurementProtocol
 	 public static function showUserRegister()
 	{
 		$name = self::OPTION_EVENT_USER_REGISTER;
-		$value = get_option($name, __('User Register', 'inanalytics'), self::OPTION_EVENT_USER_REGISTER_DEFAULT);
+		$value = get_option($name, __('User Register', 'inanalytics'));
 		echo "<input type='text' name='{$name}' value='{$value}'>&nbsp;&nbsp;";
 		_e('Specify the User Register event action. This event occurs when new user registers.', 'inanalytics');
 	}
@@ -186,7 +187,7 @@ class InaWordpress extends InaMeasurementProtocol
 	 public static function showUserLogin()
 	{
 		$name = self::OPTION_EVENT_USER_LOGIN;
-		$value = get_option($name, __('User Register', 'inanalytics'), self::OPTION_EVENT_USER_LOGIN_DEFAULT);
+		$value = get_option($name, __('User Login', 'inanalytics'));
 		echo "<input type='text' name='{$name}' value='{$value}'>&nbsp;&nbsp;";
 		_e('Specify the User Login event action. This event occurs when user login', 'inanalytics');
 	}
@@ -197,7 +198,7 @@ class InaWordpress extends InaMeasurementProtocol
 	 public static function showResetPassword()
 	{
 		$name = self::OPTION_EVENT_USER_PASSRESET;
-		$value = get_option($name, __('Reset Password', 'inanalytics'), self::OPTION_EVENT_USER_PASSRESET_DEFAULT);
+		$value = get_option($name, __('Reset Password', 'inanalytics'));
 		echo "<input type='text' name='{$name}' value='{$value}'>&nbsp;&nbsp;";
 		_e('Specify the User resets password event action. This event occurs when the user has requested an email message to retrieve their password', 'inanalytics');
 	}
@@ -208,9 +209,9 @@ class InaWordpress extends InaMeasurementProtocol
 	 public static function showComment()
 	{
 		$name = self::OPTION_EVENT_COMMENT;
-		$value = get_option($name, __('Reset Password', 'inanalytics'), self::OPTION_EVENT_COMMENT_DEFAULT);
+		$value = get_option($name, __('Comment', 'inanalytics'));
 		echo "<input type='text' name='{$name}' value='{$value}'>&nbsp;&nbsp;";
-		_e('Specify the User Login event action. This event occurs just after a comment is saved in the database.', 'inanalytics');
+		_e('Specify the comment event action. This event occurs just after a comment is saved in the database.', 'inanalytics');
 	}
 
 	
@@ -220,7 +221,7 @@ class InaWordpress extends InaMeasurementProtocol
 	 */   
 	public function isEnabled()
 	{
-		return (bool) get_option(self::OPTION_WP_ENABLED));
+		return (bool) get_option(self::OPTION_ENABLED);
 	}
 	
 	/**
@@ -234,14 +235,11 @@ class InaWordpress extends InaMeasurementProtocol
 	// ------------------------------ RUNTIME ------------------------------
 	
 	/**
-	 * Отправка события формы CF7
+	 * Регистрация пользователя
 	 */   
-	public static function sendCF7Post($cf7Object)
+	public static function sendUserRegister($user_id)
 	{
-		/* DEBUG 
-		file_put_contents(INA_FOLDER.'/cf7Object.txt', var_export($cf7Object, true));*/
-		
-		$label = (is_object($cf7Object)) ? $cf7Object->_wpcf7 : '';
+		$userLogin = (isset($_POST['username'])) ? $_POST['username'] : $user_id;
 		
 		// Передача на Google Analytics через Measurement Protocol
 		if (get_option(InaAnalytics::OPTION_ENABLED))
@@ -249,12 +247,64 @@ class InaWordpress extends InaMeasurementProtocol
 			InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
 				'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
 				'action'	=> get_option(self::OPTION_EVENT_USER_REGISTER, self::OPTION_EVENT_USER_REGISTER_DEFAULT),
-				'label'		=> $label,
+				'label'		=> $userLogin
 			));
 		}
-		
-		return $cf7Object;
 	}
 
-
+	/**
+	 * Вход пользователя
+	 */   
+	public static function sendUserLogin($user_login, $user)
+	{
+		// Передача на Google Analytics через Measurement Protocol
+		if (get_option(InaAnalytics::OPTION_ENABLED))
+		{
+			InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+				'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
+				'action'	=> get_option(self::OPTION_EVENT_USER_LOGIN, self::OPTION_EVENT_USER_LOGIN_DEFAULT),
+				'label'		=> $user_login
+			));
+		}
+	}
+	
+	/**
+	 * Сброс пароля
+	 */   
+	public static function sendResetPassword($user, $new_pass)
+	{
+		$user_login = $user->user_login;
+		
+		// Передача на Google Analytics через Measurement Protocol
+		if (get_option(InaAnalytics::OPTION_ENABLED))
+		{
+			InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+				'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
+				'action'	=> get_option(self::OPTION_EVENT_USER_PASSRESET, self::OPTION_EVENT_USER_PASSRESET_DEFAULT),
+				'label'		=> $user_login
+			));
+		}
+	}
+	
+	/**
+	 * Новый комментарий 
+	 */   
+	public static function sendNewComment($comment_ID, $comment_approved)
+	{
+		$comment = get_comment($comment_ID); 
+		$author = $comment->comment_author;
+		$postID = $comment->comment_post_ID;
+		$postTitle = get_the_title($postID);
+		
+		// Передача на Google Analytics через Measurement Protocol
+		if (get_option(InaAnalytics::OPTION_ENABLED))
+		{
+			InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+				'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
+				'action'	=> get_option(self::OPTION_EVENT_COMMENT, self::OPTION_EVENT_COMMENT_DEFAULT),
+				'label'		=> $postTitle
+			));
+		}
+	}	
+	
 }

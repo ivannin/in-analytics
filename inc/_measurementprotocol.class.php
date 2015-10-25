@@ -97,6 +97,7 @@ abstract class InaMeasurementProtocol extends InaModule
 					'dp' => $info['slug']
 				);
 				if (!empty($uid)) $data['uid'] = $uid;
+				
 				self::fireHit($data);
 			} // end pageview method
 			
