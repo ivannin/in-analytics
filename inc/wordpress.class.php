@@ -239,7 +239,9 @@ class InaWordpress extends InaMeasurementProtocol
 	 */   
 	public static function sendUserRegister($user_id)
 	{
-		$userLogin = (isset($_POST['username'])) ? $_POST['username'] : $user_id;
+		// Данные о пользователе
+		$userInfo = get_userdata($user_id);
+		$userLogin =  $userInfo->user_login;
 		
 		// Передача на Google Analytics через Measurement Protocol
 		if (get_option(InaAnalytics::OPTION_ENABLED))

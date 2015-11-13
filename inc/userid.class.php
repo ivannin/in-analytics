@@ -202,15 +202,16 @@ class InaUserID extends InaModule
 	 */   
 	public static function handleUserID($js)
 	{
-		// Информация о пользователе
-		//global $user_ID, $user_login, $current_user;
-		//get_currentuserinfo();
-		
+		// Информация о пользователе и его ролях
 		global $current_user;
 		$user_ID = $current_user->ID;
 		$user_login = $current_user->user_login;
 		$user_roles = $current_user->roles;
-		$user_role = array_shift($user_roles);
+		$user_role_id = array_shift($user_roles);
+		
+		// Получаем название роли пользователя 
+		global $wp_roles;
+		$user_role = translate_user_role($wp_roles->roles[$user_role_id]['name']);		
 		
 		/* DEBUG
 		echo '<pre>', PHP_EOL,PHP_EOL, 'ROLE: ', $user_role, PHP_EOL, 

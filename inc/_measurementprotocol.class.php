@@ -16,7 +16,7 @@ abstract class InaMeasurementProtocol extends InaModule
 	{
 		if(!isset($_COOKIE["_ga"])) 
 			return self::genUUID();
-        list($version,$domainDepth, $cid1, $cid2) = split('[\.]', $_COOKIE["_ga"],4);
+        list($version,$domainDepth, $cid1, $cid2) = explode('.', $_COOKIE["_ga"],4);
 		return $cid1 . '.' . $cid2;
 	}
 
@@ -110,11 +110,10 @@ abstract class InaMeasurementProtocol extends InaModule
 					'tid' => $tid,
 					'cid' => $cid,
 					't' => self::HIT_EVENT,
-					'ec' => $info['category'],
-					'ea' => $info['action'],
-					'el' => $info['label'],
-					'ev' => $info['value'],
+					'ec' => isset($info['category']) ? $info['category'] : '',
+					'ea' => isset($info['action']) ? $info['action'] : ''
 				);
+				// Дополнительные параметры (необязательные)
 				if (!empty($info['label'])) $data['el'] = $info['label'];
 				if (!empty($info['ev'])) $data['ev'] = intval($info['value']);
 				if (!empty($uid)) $data['uid'] = $uid;

@@ -197,13 +197,21 @@ class InaForms extends InaMeasurementProtocol
 		$label = (is_object($cf7Object)) ? $cf7Object->_wpcf7 : '';
 		
 		// Передача на Google Analytics через Measurement Protocol
-		if (get_option(InaAnalytics::OPTION_ENABLED))
+		try
 		{
-			InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
-				'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
-				'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
-				'label'		=> $label,
-			));
+			if (get_option(InaAnalytics::OPTION_ENABLED))
+			{
+				InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+					'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
+					'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
+					'label'		=> $label,
+				));
+			}								
+		}
+		catch (Exception $e) 
+		{
+			if (WP_DEBUG === true)
+				error_log('IN-Analytics: InaForms::sendCF7Post: '.print_r($e, true));
 		}
 		
 		return $cf7Object;
@@ -217,15 +225,22 @@ class InaForms extends InaMeasurementProtocol
 		$label = (is_object($form)) ? $form->title : '';
 
 		// Передача на Google Analytics через Measurement Protocol
-		if (get_option(InaAnalytics::OPTION_ENABLED))
+		try
+		{		
+			if (get_option(InaAnalytics::OPTION_ENABLED))
+			{
+				InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
+					'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
+					'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
+					'label'		=> $label,
+				));
+			}		
+		}
+		catch (Exception $e) 
 		{
-			InaMeasurementProtocol::sendHit(InaMeasurementProtocol::HIT_EVENT, array(
-				'category'	=> get_option(self::OPTION_CATEGORY, self::OPTION_CATEGORY_DEFAULT),
-				'action'	=> get_option(self::OPTION_ACTION, self::OPTION_ACTION_DEFAULT),
-				'label'		=> $label,
-			));
-		}		
-		
+			if (WP_DEBUG === true)
+				error_log('IN-Analytics: InaForms::sendGravityPost: '.print_r($e, true));
+		}
 
 		return true;
 	}
