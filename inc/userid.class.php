@@ -211,7 +211,8 @@ class InaUserID extends InaModule
 		
 		// Получаем название роли пользователя 
 		global $wp_roles;
-		$user_role = translate_user_role($wp_roles->roles[$user_role_id]['name']);		
+		$user_role = (!empty($user_ID)) ? translate_user_role($wp_roles->roles[$user_role_id]['name']) : '';
+			
 		
 		/* DEBUG
 		echo '<pre>', PHP_EOL,PHP_EOL, 'ROLE: ', $user_role, PHP_EOL, 
