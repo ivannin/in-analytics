@@ -1,15 +1,4 @@
 <?php
-/* Hooks */
-if (get_option(InaWordpress::OPTION_ENABLED))
-{
-	add_action('user_register', 'InaWordpress::sendUserRegister', 10, 1);	
-	add_action('wp_login', 'InaWordpress::sendUserLogin', 10, 2);	
-	add_action('password_reset', 'InaWordpress::sendResetPassword', 10, 2);	
-	add_action('comment_post', 'InaWordpress::sendNewComment', 10, 2 );	
-}
-	
-
-
 /**
  * Модуль Интеграция с WordPress
  *
@@ -309,4 +298,13 @@ class InaWordpress extends InaMeasurementProtocol
 		}
 	}	
 	
+}
+
+/* Hooks */
+if (get_option(InaWordpress::OPTION_ENABLED))
+{
+	add_action('user_register', 'InaWordpress::sendUserRegister', 10, 1);	
+	add_action('wp_login', 'InaWordpress::sendUserLogin', 10, 2);	
+	add_action('password_reset', 'InaWordpress::sendResetPassword', 10, 2);	
+	add_action('comment_post', 'InaWordpress::sendNewComment', 10, 2 );	
 }
