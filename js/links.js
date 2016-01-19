@@ -11,6 +11,7 @@ jQuery(function($){
 	$('a').each(function(i,objA)
 	{
 		var link = $(objA);
+		
 		// Это ссылка на скачивание?
 		if (downloadTrackingEnabled && /(%EXTENSIONS%)$/.test(objA.href))
 			link.click(function(event){
