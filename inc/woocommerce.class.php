@@ -167,9 +167,13 @@ class InaWooCommerce extends InaMeasurementProtocol
 					$catTerms = wp_get_object_terms($item['product_id'], 'product_cat');
 					$category = (count(catTerms) > 0) ? $catTerms[0]->name : '';
 					
+					// Артикул товара
+					$sku = get_post_meta($item['product_id'], '_sku', true);
+					if (empty($sku)) $sku = $item['product_id'];
+					
 					// Добавим товар в список для передачи
 					$orderItems[] = array(
-						'sku'		=> $item['product_id'],
+						'sku'		=> $sku,
 						'name'		=> $item['name'],
 						'category'	=> $category,
 						'price'		=> $item['line_total'],
