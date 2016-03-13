@@ -65,9 +65,10 @@ abstract class InaMeasurementProtocol extends InaModule
 	* Типы хитов
 	* @const
 	*/
-	const HIT_PAGEVIEW		= 'pageview';
-	const HIT_EVENT			= 'event';
-	const HIT_TRANSACTION	= 'transaction';
+	const HIT_PAGEVIEW			= 'pageview';
+	const HIT_EVENT				= 'event';
+	const HIT_TRANSACTION		= 'transaction';
+	const HIT_TRANSACTION_ITEM	= 'item';
 
 	
 	/**
@@ -121,52 +122,54 @@ abstract class InaMeasurementProtocol extends InaModule
 			} // end pageview method			
 
 			// Register an ECOMMERCE TRANSACTION (and an associated ITEM)
-			else if ($method === 'ecommerce') 
+			else if ($method === self::HIT_TRANSACTION) 
 			{
-				// Set up Transaction params
-				$ti = uniqid(); // Transaction ID
-				$ta = 'SI';
-				$tr = $info['price']; // transaction value (native currency)
-				$cu = $info['cc']; // currency code
-
 				// Send Transaction hit
 				$data = array(
-					'v' => $v,
-					'tid' => $tid,
-					'cid' => $cid,
-					't' => 'transaction',
-					'ti' => $ti,
-					'ta' => $ta,
-					'tr' => $tr,
-					'cu' => $cu
+					'v' 	=> $v,
+					'tid' 	=> $tid,
+					'cid' 	=> $cid,
+					't' 	=> self::HIT_TRANSACTION,
+					'ti' 	=> $info['transaction_id'],	
+					'tr' 	=> $info['revenue']
 				);
-				if (!empty($uid)) $data['uid'] = $uid;
+				// Дополнительные поля
+				if (isset($info['affiliation'])) 	$data['ta'] = $info['affiliation'];
+				if (isset($info['currency'])) 		$data['cu'] = $info['currency'];
+				if (isset($info['shipping'])) 		$data['ts'] = $info['shipping'];
+				if (isset($info['tax'])) 			$data['tt'] = $info['tax'];
+				
+				// UID
+				if (!empty($uid)) 					$data['uid'] = $uid;
+				
+				// Send
 				self::fireHit($data);
-
-				// Set up Item params
-				$in = urlencode($info['info']->product_name); // item name;
-				$ip = $tr;
-				$iq = 1;
-				$ic = urlencode($info['info']->product_id); // item SKU
-				$iv = urlencode('SI'); // Product Category - we use 'SI' in all cases, you may not want to
 
 				// Send Item hit
-				$data = array(
-					'v' => $v,
-					'tid' => $tid,
-					'cid' => $cid,
-					't' => 'item',
-					'ti' => $ti,
-					'in' => $in,
-					'ip' => $ip,
-					'iq' => $iq,
-					'ic' => $ic,
-					'iv' => $iv,
-					'cu' => $cu
-				);
-				if (!empty($uid)) $data['uid'] = $uid;
-				self::fireHit($data);
-
+				foreach ($info['items'] as $item)
+				{
+					$data = array(
+						'v' 	=> $v,
+						'tid' 	=> $tid,
+						'cid' 	=> $cid,
+						't' 	=> self::HIT_TRANSACTION_ITEM,
+						'ti' 	=> $info['transaction_id'],
+						'in' 	=> $item['name'],
+						'ip' 	=> $item['price'],
+						'iq' 	=> intval($item['quo']),
+						'ic' 	=> $item['sku']
+					);
+					
+					// Дополнительные параметры (необязательные)
+					if (isset($item['category'])) 	$data['iv'] = $item['category'];
+					if (isset($item['currency'])) 	$data['cu'] = $item['currency'];
+					
+					// UID
+					if (!empty($uid)) $data['uid'] = $uid;
+					
+					// Send
+					self::fireHit($data);						
+				}
 			} // end ecommerce method
 		}
 	}

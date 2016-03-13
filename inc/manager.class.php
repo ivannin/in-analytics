@@ -77,6 +77,7 @@ class InaManager
 			'ga_wordpress'	=> new InaWordpress(),
 			'ga_reading' 	=> new InaPageTracking(),
 			'ga_downloads' 	=> new InaDownloads(),
+			'woocommerce' 	=> new InaWooCommerce(),
 			'custom_code' 	=> new InaCustomCode(),
 		);
 		$this->headerJS = '';
@@ -211,6 +212,16 @@ class InaManager
 			self::MENU_SLUG, 								// page - The menu page on which to display this field
 			self::SECTION 									// section - The section of the settings page
 		);	
+		
+		// Параметр: режим E-Commerce
+		register_setting(self::MENU_SLUG, InaWooCommerce::OPTION_ECOMMERCE_ENABLED);
+		add_settings_field( 
+			InaWooCommerce::OPTION_ECOMMERCE_ENABLED,	// id - String for use in the 'id' attribute of tags
+			__('WooCommerce Intergation enabled', 'inanalytics' ),	// Title of the field
+			'InaWooCommerce::showECommerceEnabled',		// callback - Function that fills the field with the desired inputs
+			self::MENU_SLUG, 							// page - The menu page on which to display this field
+			self::SECTION 								// section - The section of the settings page
+		);		
 
 		// Параметр: произвольный код
 		register_setting(self::MENU_SLUG, InaCustomCode::OPTION_ENABLED);

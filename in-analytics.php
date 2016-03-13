@@ -26,6 +26,7 @@ require(INA_FOLDER . 'inc/wordpress.class.php');
 require(INA_FOLDER . 'inc/pagetracking.class.php');
 require(INA_FOLDER . 'inc/readmarkers.class.php');
 require(INA_FOLDER . 'inc/downloads.class.php');
+require(INA_FOLDER . 'inc/woocommerce.class.php');
 require(INA_FOLDER . 'inc/customcode.class.php');
 require(INA_FOLDER . 'inc/manager.class.php');
 
