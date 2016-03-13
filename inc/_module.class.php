@@ -51,7 +51,7 @@ abstract class InaModule
 				return '';
 		$templateMinimizedFile = str_replace('.js', '.min.js', $templateFile);
 		$js = '';
-		if (file_exists($templateMinimizedFile))
+		if ( ! WP_DEBUG && file_exists($templateMinimizedFile))
 			$js = file_get_contents($templateMinimizedFile);
 		elseif (file_exists($templateFile))
 			$js = file_get_contents($templateFile);
