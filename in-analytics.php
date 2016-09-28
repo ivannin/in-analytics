@@ -31,8 +31,8 @@ define('INA_FOLDER', 		plugin_dir_path(__FILE__));
 define('INA_URL', 			plugin_dir_url(__FILE__));
 define('INA_TEXT_DOMAIN', 	'in-analytics');
 /* ------------------------- Загрузка классов -------------------------- */
-require( WP_HOT_CORE_PATH . 'classes/ModuleManager.php');
-require( WP_HOT_CORE_PATH . 'classes/ModuleBase.php');
+require( INA_FOLDER . 'classes/INA_ModuleManager.php');
+require( INA_FOLDER . 'classes/INA_ModuleBase.php');
 
 /* ---------------- Локализация и инициализация плагина ---------------- */
 add_action( 'init', 'ina_load_textdomain' );
@@ -42,5 +42,5 @@ function ina_load_textdomain()
 	load_plugin_textdomain( INA_TEXT_DOMAIN, false, dirname( plugin_basename( __FILE__ ) ) . '/lang' );
 
 	// Инициализация плагина
-	new ModuleManager( INA_FOLDER );
+	new INA_ModuleManager( INA_FOLDER, INA_URL );
 }
