@@ -1,6 +1,20 @@
 /**
  * Оформление страницы настроек
  */
+.ina-logo
+{
+	display: block;
+	width: 100px;
+	height: 83px;	
+	float: right;
+	margin-top: 20px;
+	margin-right: 50px;
+}
+.ina-logo img
+{
+	width: 100px;
+	height: 83px;
+}
 form.ina-settings fieldset
 {
 	padding: 1em;
@@ -26,4 +40,38 @@ form.ina-settings .checkbox-field p
 {
 	margin: 0;
 	margin-left: 2em;
+}
+
+form.ina-settings .field-row
+{
+	margin-bottom: 2em;
+}
+
+form.ina-settings .field-row label
+{
+	display: inline-block;
+	width: 200px;
+	float: left;
+}
+form.ina-settings .field-row select,
+form.ina-settings .field-row input[type="text"],
+form.ina-settings .field-row textarea
+{
+	width: 20em;
+}
+
+form.ina-settings .field-row input[type="checkbox"]
+{
+	margin-right: 1ex;
+}
+
+form.ina-settings .field-row textarea
+{
+	height: 5em;
+}
+
+form.ina-settings .field-row p
+{
+	margin: 0px;
+	margin-left: 200px;
 }
