@@ -325,15 +325,6 @@ var gaOpt={};" . PHP_EOL;
 				<?php esc_html_e( 'Specify the event action for session without bounce.', INA_TEXT_DOMAIN)?>			
 			</p>
 		</div>
-		
-		<div class="field-row">
-			<label for="accurateBounceRate"><?php esc_html_e( 'Accurate Bounce Rate', INA_TEXT_DOMAIN)?></label>
-			<input id="accurateBounceRate" name="accurateBounceRate" type="checkbox" value="1" <?php checked( $this->getOption( self::PARAM_ACCURATE_BOUNCE_RATE ), 1 ); ?> />
-				<?php esc_html_e( 'Accurating bounce rate metric by additional event by timer.', INA_TEXT_DOMAIN)?>
-				<a href="<?php /* translators: Replace this link to one in necessary language */ esc_html_e( 'https://ivannikitin.com/2011/09/11/accurance-bounce-rate-google-analytics/', INA_TEXT_DOMAIN)?>" target="_blank">
-					<?php esc_html_e( 'Read more here', INA_TEXT_DOMAIN)?>
-				</a>				
-		</div>			
 
 		<div class="field-row">
 			<label for="openstat"><?php esc_html_e( 'Openstat Tag Parser', INA_TEXT_DOMAIN)?></label>
