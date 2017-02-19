@@ -18,6 +18,17 @@ class INA_YandexMetrika extends INA_Tracker
 		$this->menuTitle	= __( 'Yandex.Metrika', INA_TEXT_DOMAIN );
 		$this->menuOrder 	= 2;
     }
+	/* -------------------- Параметры модуля -------------------- */
+    /**
+     * @const          Параметр "Вебвизор, карта скроллинга, аналитика форм"
+     */    
+    const PARAM_WEBVISOR = 'webvisor';
+	
+    /**
+     * @const          Параметр "Запрет отправки на индексацию страниц сайта"
+     */    
+    const PARAM_NOINDEX = 'noindex';	
+
 	
 	/* -------------------- Основная работа -------------------- */
     /**
@@ -80,8 +91,10 @@ class INA_YandexMetrika extends INA_Tracker
      */    
     public function showMetrikaOptions( $tracker )
     {
-		$code = 'metrikaOpt={};' . PHP_EOL;
-		echo apply_filters( 'ina_metrika_options', $code );
+		$id = $this->getId();
+		$webvisor = $this->getOption( self::PARAM_WEBVISOR ) ? ',webvisor:true' : '';
+		$code = "metrikaOpt={id:{$id},clickmap:true,trackLinks:true,accurateTrackBounce:true,trackHash:true{$webvisor}};" . PHP_EOL;
+		echo apply_filters( 'ina_metrika_options_code', $code );
 	}	
 	
     /**
@@ -91,12 +104,40 @@ class INA_YandexMetrika extends INA_Tracker
      */    
     public function showMetrikaInit( $tracker )
     {
-		$id = $this->getId();
 		$counter = $this->getMetrikaVar();
-		$code = "var $counter = new Ya.Metrika({id: $id, metrikaOpt});" . PHP_EOL;
-		echo apply_filters( 'ina_metrika_load_script', $code );
+		$code = "var {$counter}=new Ya.Metrika(metrikaOpt);" . PHP_EOL;
+		echo apply_filters( 'ina_metrika_init_code', $code );
 	}	
 
-
+	/* ------------ Параметры модуля ------------ */
+    /**
+     * Формирует содержимое формы настроек модуля
+     */    
+    public function showOptionForm() 
+	{ 
+		parent::showOptionForm();
+	?>
+		<div class="field-row">
+			<label for="webvisor"><?php esc_html_e( 'Webvisor', INA_TEXT_DOMAIN)?></label>
+			<input id="webvisor" name="webvisor" type="checkbox" value="1" <?php checked( $this->getOption( self::PARAM_WEBVISOR ), 1 ); ?> />
+				<?php esc_html_e( 'Enable WebVisor.', INA_TEXT_DOMAIN)?>
+				<a href="<?php /* translators: Replace this link to one in necessary language */ esc_html_e( 'https://yandex.ru/support/metrika/general/counter-webvisor.xml', INA_TEXT_DOMAIN)?>" target="_blank">
+					<?php esc_html_e( 'Read more here', INA_TEXT_DOMAIN)?>
+				</a>				
+		</div>		
 	
+	<?php 
+	}
+	
+    /**
+     * Читает содержимое формы настроек модуля
+     */    
+    public function readOptionForm()
+    {
+		parent::readOptionForm();
+
+		$webvisor = isset( $_POST['webvisor'] ) ? (bool) sanitize_text_field( $_POST['webvisor'] ) : false;
+		$this->setOption( self::PARAM_WEBVISOR, $webvisor );		
+		
+	}	
 }

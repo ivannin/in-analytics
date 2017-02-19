@@ -20,7 +20,7 @@ class INA_User_ID extends INA_ModuleBase
 		
 		// Свойства модуля
 		$this->title 		= __( 'User ID', INA_TEXT_DOMAIN );
-		$this->description	= __( 'User ID cross-device tracking', INA_TEXT_DOMAIN );
+		$this->description	= __( 'User ID tracking', INA_TEXT_DOMAIN );
 		$this->menuTitle	= __( 'User ID', INA_TEXT_DOMAIN );
 		$this->menuOrder 	= 10;
 		
