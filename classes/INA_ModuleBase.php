@@ -12,7 +12,12 @@ class INA_ModuleBase
     /**
      * @var string      Краткое описание модуля модуля
      */
-    public $description;	
+    public $description;
+
+    /**
+     * @var string      Название модуля для меню
+     */
+    public $menuTitle;	
 	
     /**
      * @var int         Порядок в меню
@@ -23,27 +28,6 @@ class INA_ModuleBase
      * @var ModuleManager $manager      Ссылка на менеджера модулей
      */
     protected $manager;
-	
-    /**
-     * @var string      JavaScript в шапке
-     */
-    protected $jsHead;
-	
-    /**
-     * @var string      Другой код в шапке
-     */
-    protected $otherHead;
-
-    /**
-     * @var string      JavaScript в подвале
-     */
-    protected $jsFoot;
-	
-    /**
-     * @var string      Другой код в подвале
-     */
-    protected $otherFoot;
-	
     
     /**
      * Конструктор класса
@@ -53,14 +37,45 @@ class INA_ModuleBase
     {
         // Сохраним ссылку на менеджера модулей
         $this->manager = $manager;
-		
-		// Инициализация кода
-		$this->jsHead 		= '';
-		$this->otherHead 	= '';
-		$this->jsFoot 		= '';
-		$this->otherFoot	= '';
+
     }
-    
+	
+	/* -------------------- Доступность модуля -------------------- */
+	
+    /**
+     * @const ENABLED          Параметр "Модуль доступен"
+     */    
+    const ENABLED = 'ina_settings';	
+	
+    /**
+     * Возвращает доступность модуля
+     * @return bool     
+     */    
+    public function isEnabled()
+    {
+        return $this->getOption( self::ENABLED );
+    }
+
+    /**
+     * Устанавливает доступность модуля
+     * @param bool  $value         Значение параметра
+     */    
+    public function setEnabled( $value )
+    {
+        $this->setOption( self::ENABLED, $value );
+    }	
+	
+	/* -------------------- Основная работа -------------------- */
+    /**
+     * Выполняет необходимые действия модуля после инициализации системы   
+     */    
+    public function handle()
+    {
+		// По умлочанию ничего не делаем
+    }
+
+	
+	/* -------------------- Сервисные функции -------------------- */
     /**
      * Возвращает параметр настройки
      * @param string $optionName    Имя параметра
@@ -89,66 +104,6 @@ class INA_ModuleBase
         $this->manager->saveOptions();
     }	
 	
-	/* -------------------- Доступность модуля -------------------- */
-	
-    /**
-     * @const ENABLED          Параметр "Модуль доступен"
-     */    
-    const ENABLED = 'ina_settings';	
-	
-    /**
-     * Возвращает доступность модуля
-     * @return bool     
-     */    
-    public function isEnabled()
-    {
-        return $this->getOption( self::ENABLED );
-    }
-
-    /**
-     * Устанавливает доступность модуля
-     * @param bool  $value         Значение параметра
-     */    
-    public function setEnabled( $value )
-    {
-        $this->setOption( self::ENABLED, $value );
-    }	
-	
-	/* ------------ Методы модуля, возвращающие код ------------ */
-    /**
-     * Возвращает JavaScript шапки
-     */    
-    public function getJSHead()
-    {
-		if ( $this->isEnabled() )
-			return apply_filters(get_class( $this ) . '_head_js',  $this->jsHead);
-    }	
-    /**
-     * Возвращает другой код шапки
-     */    
-    public function getOtherHead()
-    {
-		if ( $this->isEnabled() )
-			return apply_filters(get_class( $this ) . '_head_other',  $this->otherHead);
-    }	
-    /**
-     * Возвращает JavaScript подвала
-     */    
-    public function getJSFoot()
-    {
-		if ( $this->isEnabled() )
-			return apply_filters(get_class( $this ) . '_foot_js',  $this->jsFoot);
-    }	
-    /**
-     * Возвращает другой код подвала
-     */    
-    public function getOtherFoot()
-    {
-		if ( $this->isEnabled() )
-			return apply_filters(get_class( $this ) . '_foot_other',  $this->otherFoot);
-    }	
-	
-	
     /**
      * Загружает js файл из папки js
      * @param string $fileName		Имя файда
@@ -174,6 +129,63 @@ class INA_ModuleBase
 		// Возвращаем файл
 		return file_get_contents( $fileName );
     }
+	
     
+	/* ------------ Страница настроек модуля ------------ */
+	
+    /**
+     * @const           Поле nonce для доступа в форме
+     */    
+    const NONCE = 'ina_nonce';
+	
+    /**
+     * Формирует страницу настроек модуля
+     */    
+    public function showOptionPage()
+    {
+		// Сохранение настроек
+		if ( $_SERVER['REQUEST_METHOD'] == 'POST' )
+		{
+			// Проверка nonce
+			$nonce = isset( $_POST[self::NONCE] ) ? $_POST[self::NONCE] : '';
+			if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, get_class( $this ) ) )
+			{
+				
+				// Читаем параметры формы
+				$this->readOptionForm();
+				
+				// Сохраняем параметры
+				$this->saveOptions();
+			}
+		}
+	?>
+	<a  class="ina-logo" href="<?php esc_html_e( 'http://in-analytics.com', INA_TEXT_DOMAIN)?>" title="<?php esc_html_e( 'Visit the official IN-Analytics site', INA_TEXT_DOMAIN)?>">
+		<img src="<?php echo $this->manager->baseURL ?>img/in-analytics-transparent-100x83.png" />
+	</a>
+	<form action="<?php echo $_SERVER['REQUEST_URI']?>" method="post" class="ina-settings">
+		<?php wp_nonce_field( get_class( $this ), self::NONCE ) ?>
+		<?php $this->showOptionForm() ?>
+		<?php submit_button() ?>
+	</form>
+	<?php			
+	}
+
+    /**
+     * Читает содержимое формы настроек модуля
+     */    
+    public function readOptionForm()
+    {
+		// Nothing
+	}		
+	
+    /**
+     * Формирует содержимое формы настроек модуля
+     */    
+    public function showOptionForm() 
+	{ ?>
+		<h2><?php echo $this->title?></h2>
+		<p><?php echo $this->description?></p>		
+	<?php 
+	}	
 	
 }
