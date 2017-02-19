@@ -349,7 +349,7 @@ var gaOpt={};" . PHP_EOL;
 		$crossDomains = implode( "\n", array_map( 'sanitize_text_field', explode( "\n", $_POST['crossDomains'] ) ) );
 		$this->setOption( self::PARAM_CROSS_DOMAINS, $crossDomains );
 		
-		$demographics = isset( $_POST['demographics'] ) ? (bool) sanitize_text_field( $_POST['adminTracking'] ) : false;
+		$demographics = isset( $_POST['demographics'] ) ? (bool) sanitize_text_field( $_POST['demographics'] ) : false;
 		$this->setOption( self::PARAM_DEMOGRAPHICS, $demographics );	
 
 		$enhancedLinkAttribution = isset( $_POST['enhancedLinkAttribution'] ) ? (bool) sanitize_text_field( $_POST['enhancedLinkAttribution'] ) : false;
