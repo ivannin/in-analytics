@@ -93,7 +93,7 @@ class INA_YandexMetrika extends INA_Tracker
     {
 		$id = $this->getId();
 		$webvisor = $this->getOption( self::PARAM_WEBVISOR ) ? ',webvisor:true' : '';
-		$code = "metrikaOpt={id:{$id},clickmap:true,trackLinks:true,accurateTrackBounce:true,trackHash:true{$webvisor}};" . PHP_EOL;
+		$code = "var yaCounterOptions={id:{$id},clickmap:true,trackLinks:true,accurateTrackBounce:true,trackHash:true{$webvisor}};" . PHP_EOL;
 		echo apply_filters( 'ina_metrika_options_code', $code );
 	}	
 	
@@ -105,7 +105,7 @@ class INA_YandexMetrika extends INA_Tracker
     public function showMetrikaInit( $tracker )
     {
 		$counter = $this->getMetrikaVar();
-		$code = "var {$counter}=new Ya.Metrika(metrikaOpt);" . PHP_EOL;
+		$code = "var {$counter}=new Ya.Metrika(yaCounterOptions);" . PHP_EOL;
 		echo apply_filters( 'ina_metrika_init_code', $code );
 	}	
 
