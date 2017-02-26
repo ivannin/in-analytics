@@ -27,7 +27,7 @@ class INA_ModuleManager
     /**
      * @var mixed $modules      Массив загруженных модулей модулей
      */
-    protected $modules;     
+    public $modules;     
     
     /**
      * Конструктор класса

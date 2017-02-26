@@ -34,6 +34,7 @@ define('INA_TEXT_DOMAIN', 	'in-analytics');
 require( INA_FOLDER . 'classes/INA_ModuleManager.php');
 require( INA_FOLDER . 'classes/INA_ModuleBase.php');
 require( INA_FOLDER . 'classes/INA_Tracker.php');
+require( INA_FOLDER . 'classes/INA_MeasurementProtocol.php');
 
 /* ---------------- Локализация и инициализация плагина ---------------- */
 add_action( 'init', 'ina_load_textdomain' );
