@@ -90,14 +90,18 @@ class INA_CF7 extends INA_ModuleBase
 			// Передача формы в GA
 			if ( $this->measurementProtocol  )
 			{
-				$this->measurementProtocol->sendEvent( $this->gaEventCategory, $this->gaEventActionSend, $cf7->title() );
+				$this->measurementProtocol->sendEvent( 
+					$this->gaEventCategory, 
+					$this->gaEventActionSend, 
+					$cf7->title() 
+				);
 			}
 			
 		}
 		catch ( Exception $e )
 		{
 			// Была ошибка!
-			file_put_contents( $this->manager->baseDir . strtolower( get_class( $this ) ) . '.error.log', $e->getMessage() . PHP_EOL, FILE_APPEND );
+			WP_DEBUG && file_put_contents( $this->manager->baseDir . strtolower( get_class( $this ) ) . '.error.log', $e->getMessage() . PHP_EOL, FILE_APPEND );
 		}
 		return true;
 	}	
