@@ -95,6 +95,9 @@ class INA_User_ID extends INA_ModuleBase
      */    
     public function showGAUserDimesionsCode( $tracker )
 	{
+		if ( empty( $this->userId ) )
+			return;
+		
 		$code = '';
 		
 		if ( $this->getOption( self::PARAM_DIMENSION_USER_ID_ENABLED ) && ! empty ( $this->getOption( self::PARAM_DIMENSION_USER_ID ) ) )
@@ -119,9 +122,11 @@ class INA_User_ID extends INA_ModuleBase
      */    
     public function showMetrikaUserIdCode( $tracker )
 	{
-		$metrika = $tracker->getMetrikaVar();
-		$code = ( ! empty( $this->userId ) ) ? "$metrika.setUserID('{$this->userId}');" . PHP_EOL : '';
+		if ( empty( $this->userId ) )
+			return;
 		
+		$metrika = $tracker->getMetrikaVar();
+		$code =  "$metrika.setUserID('{$this->userId}');" . PHP_EOL;
 		
 		$userParams = array();
 		if ( $this->getOption( self::PARAM_METRIKA_USER_ID_ENABLED ) && ! empty ( $this->getOption( self::PARAM_METRIKA_USER_ID ) ) )
