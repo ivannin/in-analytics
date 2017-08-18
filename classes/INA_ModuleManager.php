@@ -58,7 +58,7 @@ class INA_ModuleManager
 		{
 			add_action( 'admin_enqueue_scripts', array( $this, 'adminScriptsAndCSS' ) );
 			add_action( 'admin_menu', array( $this, 'addAdminMenu' ) );
-			add_action( 'admin_init', array( $this, 'settingsInit' ) );
+			//add_action( 'admin_init', array( $this, 'settingsInit' ) );
 		}
     }
         

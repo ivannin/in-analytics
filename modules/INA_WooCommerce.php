@@ -25,7 +25,6 @@ class INA_WooCommerce extends INA_ModuleBase
      * @var string      Режим электронной коммерации
      */
     public $ecommerceMode;
-
 	
     /**
      * @var INA_MeasurementProtocol      Объект протолока Measurement Protocol 
@@ -42,12 +41,14 @@ class INA_WooCommerce extends INA_ModuleBase
 		
 		// Свойства модуля
 		$this->title 		= __( 'WooCommerce Integration', INA_TEXT_DOMAIN );
-		$this->description	= __( 'Google Analytics E-Commerce Integration', INA_TEXT_DOMAIN );
+		$this->description	= __( 'WooCommerce Integration', INA_TEXT_DOMAIN );
 		$this->menuTitle	= __( 'WooCommerce', INA_TEXT_DOMAIN );
 		$this->menuOrder 	= 30;
 		
 		// Режим электронной коммерации
 		$this->ecommerceMode = ( ! empty( $this->getOption( self::PARAM_GA_ECOMMERCE_MODE ) ) ) ? $this->getOption( self::PARAM_GA_ECOMMERCE_MODE ) : self::PARAM_GA_ECOMMERCE_MODE_STANDART;
+		
+		WP_DEBUG && file_put_contents( INA_FOLDER . strtolower( get_class( $this ) ) . '.log', 'Init ' . date('d.n.Y H:i:s') . PHP_EOL, FILE_APPEND );
 
     }
 	
@@ -64,20 +65,24 @@ class INA_WooCommerce extends INA_ModuleBase
 		{
 			$ga = $this->manager->modules['INA_GoogleAnalytics'];
 			$gaId = $ga->getId();
-			$uid = get_current_user_id();
-			
 			if ( ! empty( $gaId ) )
+			{				
+				// Если пользователь авторизван и не в админке, запоминаем его UID
+				// Так сделано потому, чтобы не запоминать UID менеджера магазина при ручном оформлении заказа
+				$uid = ( is_user_logged_in() && ! is_admin() ) ? get_current_user_id() : false;
+				
+				// Оъект Measurement Protocol хранит и CID и UID
 				$this->measurementProtocol = new INA_MeasurementProtocol( $gaId, $uid );
+			}
 		}		
-
+		
 		// Новый заказ
-		add_action( 'woocommerce_new_order', array( $this, 'newOrder' )); 
-		
-		
+		add_action( 'woocommerce_new_order', array( $this, 'newOrder' ));
     }
 	
     /**
      * Обработка нового заказа
+	 * Передача заказа через Measurement Protocol, что позволяет передавать любые заказы, включая заказы из админки
 	 * @param int	$orderId	Номер нового заказа	 
      */    
     public function newOrder( $orderId )
@@ -85,14 +90,62 @@ class INA_WooCommerce extends INA_ModuleBase
 		// ОБЯЗАТЕЛЬНО В БЛОКЕ TRY-CATCH. Если будут ошибки, не должно ломаться
 		try
 		{
+			$order = new WC_Order( $orderId );					// Заказ
+			$orderUser = $order->get_user();					// Пользователь заказа (false для гостя)
+			$orderTotal = $order->get_total();					// Сумма заказа
+			$orderShipping = $order->get_total_shipping();		// Сумма доставки
+			WP_DEBUG && file_put_contents( $this->manager->baseDir . 'wc-order.log', var_export( $order, true ) . PHP_EOL, FILE_APPEND );
 			
-			// Информация о заказе
-			$order = new WC_Order( $orderId );
-			$items = $order->get_items();
-			WP_DEBUG && file_put_contents( $this->manager->baseDir . 'wc-order.log', var_export( $order, true ) . PHP_EOL, FILE_APPEND );			
+			$orderItems = $order->get_items();
 			WP_DEBUG && file_put_contents( $this->manager->baseDir . 'wc-items.log', var_export( $items, true ) . PHP_EOL, FILE_APPEND );			
-
 			
+			// Работа с Google Analytics
+			if ( $this->measurementProtocol )
+			{
+				// Передаем транзакцию
+				$this->measurementProtocol->sendTrans(
+					$orderId,									// Уникальный идентификатор транзакции
+					'',											// Аффилированность транзакции
+					$orderTotal,								// Доход от транзакции
+					$orderShipping,								// Стоимость доставки
+					0											// Налог с транзакции
+				);
+				
+				// Передаем элементы заказа
+				foreach( $items as $item_id => $item ) 
+				{
+					$name = $item['name'];													// Get the product name
+					$quo = $order->get_item_meta($item_id, '_qty', true);					// Get the item quantity
+					$item_total = $order->get_item_meta($item_id, '_line_total', true);		// Get the item line total
+					
+					// Check if product has variation
+					$product_variation_id = $item['variation_id'];
+					if ( $product_variation_id ) 
+					{
+					  $product = new WC_Product($item['variation_id']);
+					} 
+					else 
+					{
+					  $product = new WC_Product($item['product_id']);
+					}
+
+					// Get SKU
+					$sku = $product->get_sku();
+					$price = $product->get_price();
+					
+					// Передача 
+					$this->measurementProtocol->sendTransItem(
+						$orderId,									// Уникальный идентификатор транзакции
+						$name,										// Название товара
+						$price,										// Цена товара
+						$quo,										// Количество единиц товара
+						$sku										// Код товара
+					);					
+				}				
+				
+				
+				
+			}
 		}
 		catch ( Exception $e )
 		{

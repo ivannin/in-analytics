@@ -42,9 +42,9 @@ class INA_CF7 extends INA_ModuleBase
 		parent::__construct( $manager );
 		
 		// Свойства модуля
-		$this->title 		= __( 'Concact Form 7', INA_TEXT_DOMAIN );
-		$this->description	= __( 'Concact Form 7 integration', INA_TEXT_DOMAIN );
-		$this->menuTitle	= __( 'Concact Form 7 Integration', INA_TEXT_DOMAIN );
+		$this->title 		= __( 'Contact Form 7', INA_TEXT_DOMAIN );
+		$this->description	= __( 'Contact Form 7 integration', INA_TEXT_DOMAIN );
+		$this->menuTitle	= __( 'Contact Form 7 Integration', INA_TEXT_DOMAIN );
 		$this->menuOrder 	= 20;
 		
 		// Google Analytics
@@ -74,7 +74,7 @@ class INA_CF7 extends INA_ModuleBase
 	
 	
 		// Ставим обработчик
-		add_action( 'wpcf7_before_send_mail', 	array( $this, 'formDataSend' ) );				// Отравка формы
+		add_action( 'wpcf7_mail_sent', 	array( $this, 'formDataSend' ) );				// Отравка формы
 
     }
 	
@@ -93,17 +93,16 @@ class INA_CF7 extends INA_ModuleBase
 				$this->measurementProtocol->sendEvent( 
 					$this->gaEventCategory, 
 					$this->gaEventActionSend, 
-					$cf7->title() 
+					$cf7->title
 				);
 			}
-			
 		}
 		catch ( Exception $e )
 		{
 			// Была ошибка!
 			WP_DEBUG && file_put_contents( $this->manager->baseDir . strtolower( get_class( $this ) ) . '.error.log', $e->getMessage() . PHP_EOL, FILE_APPEND );
 		}
-		return true;
+		return $cf7;
 	}	
 	
 	/* ------------ Параметры модуля ------------ */
