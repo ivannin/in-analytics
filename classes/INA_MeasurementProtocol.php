@@ -28,49 +28,57 @@ class INA_MeasurementProtocol
     {
 		// Инициализиуем свойства
 		$this->gaID = $gaID;
-		$this->cid = $this->getCID();
+		
+		// CID
+		$this->cid = $this->getCID();		
+		if ( empty( $this->cid ) )
+			$this->cid = $this->generateCID();
+		
+		// UID
 		$this->uid = $uid;
     }
 
 	/**
 	 * Возвразщает значение cid из cookie
 	 */   
-	protected function getCID()
+	public function getCID()
 	{
 		// Проверяем значение куки
 		if ( ! isset($_COOKIE['_ga'] ) )
-		{
-			/** 
-			 * CID не определен!
-			 * Генерирует новый cid по RFC4122
-			 * Благодарности Stu Miller
-			 * Generate UUID v4 function - needed to generate a CID when one isn't available
-			 * http://www.stumiller.me/implementing-google-analytics-measurement-protocol-in-php-and-wordpress/
-			 */
-			return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-				// 32 bits for "time_low"
-				mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
-
-				// 16 bits for "time_mid"
-				mt_rand( 0, 0xffff ),
-
-				// 16 bits for "time_hi_and_version",
-				// four most significant bits holds version number 4
-				mt_rand( 0, 0x0fff ) | 0x4000,
-
-				// 16 bits, 8 bits for "clk_seq_hi_res",
-				// 8 bits for "clk_seq_low",
-				// two most significant bits holds zero and one for variant DCE1.1
-				mt_rand( 0, 0x3fff ) | 0x8000,
-
-				// 48 bits for "node"
-				mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
-				);			 
-		}
+			return false;
 		
 		// Читаем CID
-        list( $version, $domainDepth, $cid1, $cid2 ) = explode('.', $_COOKIE["_ga"],4);
+        list( $version, $domainDepth, $cid1, $cid2 ) = explode( '.', $_COOKIE['_ga'], 4 );
 		return $cid1 . '.' . $cid2;
+	}
+
+	/**
+	 * Генерирует новый cid по RFC4122
+	 * Благодарности Stu Miller
+	 * Generate UUID v4 function - needed to generate a CID when one isn't available
+	 * http://www.stumiller.me/implementing-google-analytics-measurement-protocol-in-php-and-wordpress/
+	 */   
+	public function generateCID()
+	{	
+		return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+			// 32 bits for "time_low"
+			mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+
+			// 16 bits for "time_mid"
+			mt_rand( 0, 0xffff ),
+
+			// 16 bits for "time_hi_and_version",
+			// four most significant bits holds version number 4
+			mt_rand( 0, 0x0fff ) | 0x4000,
+
+			// 16 bits, 8 bits for "clk_seq_hi_res",
+			// 8 bits for "clk_seq_low",
+			// two most significant bits holds zero and one for variant DCE1.1
+			mt_rand( 0, 0x3fff ) | 0x8000,
+
+			// 48 bits for "node"
+			mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+			);
 	}
 	
 	/**
@@ -96,7 +104,7 @@ class INA_MeasurementProtocol
 			
 			// Добавляем данные для передачи
 			$payload = array_merge( $params, $data );
-			//file_put_contents( INA_FOLDER . strtolower( get_class( $this ) ) . '.log', var_export($payload, true) . PHP_EOL, FILE_APPEND );
+			WP_DEBUG && file_put_contents( INA_FOLDER . strtolower( get_class( $this ) ) . '.log', var_export($payload, true) . PHP_EOL, FILE_APPEND );
 			
 			$getString = 'https://ssl.google-analytics.com/collect';
 			$getString .= '?payload_data&';
@@ -137,5 +145,50 @@ class INA_MeasurementProtocol
 			'el' => $label,			
 			'ev' => (int) $value,			
 		));
+	}
+
+	/**
+	 * Посылает хит "Транзакция" в Google Analytics
+	 *
+     * @param string $orderId		Уникальный идентификатор транзакции
+     * @param string $affiliate		Аффилированность транзакции
+     * @param float  $revenue		Доход от транзакции		
+     * @param float  $shipping		Стоимость доставки
+     * @param float  $tax			Налог с транзакции
+	 */	
+	public function sendTrans( $orderId, $affiliate='', $revenue=0, $shipping=0, $tax=0) 
+	{
+		return $this->fireHit( array(
+			't' => 'transaction',
+			'ti' => $orderId,
+			'ta' => $affiliate,			
+			'tr' => (float) $revenue,			
+			'ts' => (float) $shipping,			
+			'tt' => (float) $tax,			
+		));
+	}
+	
+	/**
+	 * Посылает хит "Элемент транзакции" в Google Analytics
+	 *
+     * @param string $orderId		Уникальный идентификатор транзакции
+     * @param string $name			Название товара
+     * @param float  $price			Цена товара		
+     * @param int    $quo			Количество единиц товара
+     * @param string $sku			Код товара
+     * @param string $category		Категория товара
+	 */	
+	public function sendTransItem( $orderId, $name, $price=0, $quo=1, $sku='', $category='') 
+	{
+		return $this->fireHit( array(
+			't' => 'item',
+			'ti' => $orderId,			
+			'in' => $name,
+			'ip' => (float) $price,			
+			'iq' => (int) $quo,			
+			'ic' => $sku,			
+			'iv' => $category,			
+		));
 	}	
+	
 }
